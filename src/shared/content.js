@@ -17,14 +17,29 @@ export async function listArticles() {
   for (const d of dirs) {
     if (!d.isDirectory()) continue;
     const slug = d.name;
+
     const zhPath = path.join(CONTENT_ROOT, slug, 'zh.md');
+    const metaPath = path.join(CONTENT_ROOT, slug, 'meta.json');
+
     try {
       const raw = await fs.readFile(zhPath, 'utf-8');
       const fm = matter(raw);
+
+      // Best-effort: use createdAt from meta.json for stable ordering within a day.
+      let createdAt = null;
+      try {
+        const metaRaw = await fs.readFile(metaPath, 'utf-8');
+        const meta = JSON.parse(metaRaw);
+        createdAt = meta?.createdAt ?? null;
+      } catch {
+        // ignore
+      }
+
       items.push({
         slug,
         title: fm.data.title ?? slug,
         date: fm.data.date ?? null,
+        createdAt,
         sourceUrl: fm.data.sourceUrl ?? null,
       });
     } catch {
@@ -32,7 +47,26 @@ export async function listArticles() {
     }
   }
 
-  items.sort((a, b) => String(b.date ?? '').localeCompare(String(a.date ?? '')));
+  function ts(x) {
+    if (!x) return null;
+    const t = Date.parse(x);
+    return Number.isFinite(t) ? t : null;
+  }
+
+  items.sort((a, b) => {
+    const ac = ts(a.createdAt);
+    const bc = ts(b.createdAt);
+    if (ac !== null || bc !== null) return (bc ?? -1) - (ac ?? -1);
+
+    // Fallback: date (YYYY-MM-DD) descending.
+    const ad = String(a.date ?? '');
+    const bd = String(b.date ?? '');
+    if (ad !== bd) return bd.localeCompare(ad);
+
+    // Last resort: slug stable.
+    return String(a.slug).localeCompare(String(b.slug));
+  });
+
   return items;
 }
 
