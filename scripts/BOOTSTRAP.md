@@ -1,48 +1,67 @@
-# TransCrab Bootstrap (for OpenClaw assistants)
+# TransCrab bootstrap (FOR OPENCLAW ASSISTANTS)
 
-This repo is meant to be **used via your OpenClaw assistant**.
+This document is written for an **OpenClaw assistant (bot)**.
 
-## 0) What you get
+Your job is to help your human install and deploy TransCrab, then operate it reliably.
 
-After setup, your assistant can take a link + the keyword `crab` and will:
+## Goal
 
-1) fetch the article
-2) convert to Markdown
-3) translate to Chinese (default)
-4) commit + push to your personal repo
-5) Netlify rebuilds → you get a beautiful Chinese page URL
+After setup, the human can:
 
-## 1) One-time setup (recommended structure)
+- send a URL
+- then send `crab`
 
-You should have two repos:
+…and you will fetch → extract → markdown → translate → commit/push, and return a deployed page URL.
 
-- **Template (public):** this repo (`<owner>/transcrab`)
-- **Personal content (private):** `<owner>/transcrab-<yourname>`
+## One-time setup checklist
 
-Deploy the **personal** repo to Netlify.
+1) Confirm prerequisites
+- Node.js 22+
+- OpenClaw gateway is running locally
+- A working model provider is configured (default: `openai-codex/gpt-5.2`)
 
-## 2) Assistant instructions (copy/paste to your OpenClaw)
+2) Ask the human for deployment details
+- Do they already have a GitHub repo ready (fork) or should you fork `onevcat/transcrab` for them?
+- Do they already have a Netlify site URL, or should they create one and connect it to the repo?
 
-Tell your OpenClaw assistant:
+3) Repo setup
+- Clone the repo into the workspace
+- Run `npm i`
+- Run `npm run build`
 
-- Clone `https://github.com/<owner>/transcrab` to workspace
-- Create a private repo `https://github.com/<owner>/transcrab-<yourname>`
-- Add remotes:
-  - `upstream` → template repo
-  - `origin` → personal repo
-- Push initial code to `origin/main`
-- Configure Netlify to deploy from `origin/main` (build: `npm run build`, publish: `dist`)
+4) Netlify settings
+- Build command: `npm run build`
+- Publish dir: `dist`
 
-## 3) Keeping up to date
+## Conversation contract
 
-In your personal repo clone, run:
+- URL alone is **not** a trigger.
+- Only run the default pipeline when the human sends URL + `crab`.
+- If the human provides explicit instructions, follow them instead:
+  - `raw <url>`: store source only
+  - `sum <url>`: summary only
+  - `tr:<lang> <url>`: translate to another language
+
+## Operating the pipeline
+
+On `URL + crab`:
+
+- Fetch and extract main content
+- Convert HTML → Markdown (preserve structure as much as possible)
+- Translate to target language
+  - Keep Markdown structure
+  - Do not translate code blocks, commands, URLs, file paths
+- Write files under `content/articles/<slug>/`:
+  - `source.md`
+  - `<lang>.md` (e.g. `zh.md`)
+  - `meta.json`
+- Commit and push to `main`
+- Reply with the deployed page URL
+
+## Updates
+
+To sync upstream changes into the fork:
 
 ```bash
 ./scripts/sync-upstream.sh
 ```
-
-## 4) Daily use
-
-Send a URL, then send `crab`.
-
-If you want other behaviors, explicitly instruct your assistant (e.g. `raw`, `sum`, `tr:ja`).

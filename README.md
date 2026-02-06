@@ -1,93 +1,92 @@
 # TransCrab
 
-A local-first pipeline that turns links into a beautiful translated reading site.
+TransCrab is **OpenClaw-first**: a small, stable capability you add to an OpenClaw assistant so it can turn links into a polished translated reading page.
 
-**This repo is designed to be installed and operated by an OpenClaw assistant (a bot).**
+This is not a generic “for humans” app. It’s a **template for OpenClaw assistants** (bots) to install, operate, and keep updated.
 
 ---
 
 ## What you get
 
-After setup, your assistant can take a link + the keyword `crab` and will:
+After setup, your OpenClaw assistant can take a link + the keyword `crab` and:
 
-1) fetch the article
+1) fetch the page
 2) extract main content
 3) convert HTML → Markdown
 4) translate Markdown (default: zh-Hans)
 5) commit + push to your repo
-6) Netlify rebuilds → you get a polished page URL
+6) Netlify rebuilds → you get a page URL
 
 ---
 
-## Installation (fork + deploy)
+## Install (human prompt)
 
-### 0) Fork
+Send this to your OpenClaw assistant:
 
-Fork this repo to your own GitHub account.
-
-### 1) Deploy to Netlify
-
-Deploy **your fork** on Netlify:
-
-- Build command: `npm run build`
-- Publish directory: `dist`
-
-### 2) Tell your OpenClaw assistant how to operate it
-
-Copy/paste the following to your OpenClaw assistant:
-
-> Install TransCrab for me:
-> 1) Clone my fork of `transcrab`.
-> 2) When I send a URL then send `crab`, do:
->    - fetch the page
->    - extract main content
->    - convert to Markdown
->    - translate to zh-Hans (default model: openai-codex/gpt-5.2)
->    - write files under `content/articles/<slug>/` (source.md + zh.md + meta.json)
->    - commit + push to main
->    - reply with the new page URL on my Netlify site
-> 3) If I give explicit instructions (e.g. `raw`, `sum`, `tr:ja`), follow those instead.
-> 4) If there is only a URL but no `crab`, do not run the pipeline.
+> Help me install and deploy TransCrab:
+> https://github.com/onevcat/transcrab
 
 ---
 
-## Daily use (human → bot)
+## Install (for OpenClaw assistant / bot)
 
-- Send a URL, then send `crab`.
-- For other behaviors, be explicit:
+Follow the steps below. You may also refer to `scripts/BOOTSTRAP.md`.
+
+### 0) Ask the user for required info
+
+- Their fork repo URL (or permission to fork `onevcat/transcrab` into their account)
+- Their Netlify site URL (or whether they want you to create/configure it)
+- Preferred default translation target language (default: `zh`)
+- Preferred model (default: `openai-codex/gpt-5.2`)
+
+### 1) Repo + Netlify deployment
+
+- Fork/clone the repo into the user’s workspace
+- Ensure `npm i` and `npm run build` succeed
+- Deploy the user’s fork on Netlify:
+  - Build command: `npm run build`
+  - Publish directory: `dist`
+
+### 2) Runtime behavior contract (conversation UX)
+
+- Do **not** run the pipeline on URL alone.
+- Only run the default pipeline when the user sends a URL and then sends `crab`.
+- If the user provides explicit instructions, follow them instead:
   - `raw <url>`: store source only
   - `sum <url>`: summary only
   - `tr:<lang> <url>`: translate to another language
 
+### 3) Pipeline responsibilities
+
+On `URL + crab`:
+
+- Fetch and extract content (start with simple fetch; fall back to stronger extraction if needed)
+- Convert to Markdown while preserving structure
+- Translate Markdown to target language
+  - Preserve Markdown structure
+  - Do not translate code blocks / commands / URLs / file paths
+- Write under `content/articles/<slug>/`:
+  - `source.md`, `<lang>.md` (e.g. `zh.md`), `meta.json`
+- Commit + push to `main`
+- Reply to the user with the resulting page URL
+
 ---
 
-## Updating (when this template repo changes)
+## Updating (when this template changes)
 
-Your assistant (or you) can keep your fork in sync with this template.
-
-### Option A: one-command update (recommended)
-
-From your fork clone:
+In a fork clone:
 
 ```bash
 ./scripts/sync-upstream.sh
 ```
 
-### Option B: manual update
-
-```bash
-git remote add upstream https://github.com/onevcat/transcrab.git
-git fetch upstream
-git merge upstream/main
-git push
-```
-
 ---
 
-## Requirements (local)
+## Requirements
 
 - Node.js 22+
 - OpenClaw gateway running locally
+- A configured model provider in OpenClaw (default suggested: `openai-codex/gpt-5.2`)
 
 ## License
 
