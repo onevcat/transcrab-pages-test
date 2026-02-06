@@ -137,10 +137,21 @@ const { title = 'TransCrab', description } = Astro.props;
       }
       a.brand > span { margin-left: 2px; font-weight: 700; font-size: 1.35rem; }
       img.brand-mark {
-        width: 1.05em;
-        height: 1.05em;
-        flex: 0 0 1.05em;
-        transform: translateY(1.5px);
+        width: 1.1em;
+        height: 1.1em;
+        flex: 0 0 1.1em;
+        transform: translateY(0.5px);
+      }
+
+      @media (max-width: 520px) {
+        /* Slightly larger mark on mobile + nudge up a bit */
+        img.brand-mark {
+          width: 1.2em;
+          height: 1.2em;
+          flex: 0 0 1.2em;
+          transform: translateY(-0.5px);
+        }
+        a.brand > span { font-size: 1.45rem; }
       }
 
       button.icon-btn {
