@@ -210,6 +210,10 @@ const { title = 'TransCrab', description } = Astro.props;
         transition: opacity 120ms ease;
       }
       pre:hover button.copy-btn { opacity: 1; }
+      /* On touch devices, hover doesn't exist; keep it visible. */
+      @media (hover: none) {
+        button.copy-btn { opacity: 1; }
+      }
       button.copy-btn svg { width: 16px; height: 16px; display:block; }
 
       /* Theme icon switching */
