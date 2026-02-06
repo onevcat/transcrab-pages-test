@@ -17,11 +17,12 @@ const CONTENT_ROOT = path.join(ROOT, 'content', 'articles');
 
 function usage() {
   console.log(`Usage:
-  node scripts/add-url.mjs <url> [--lang zh] [--model openai-codex/gpt-5.2]
+  node scripts/add-url.mjs <url> [--lang zh] [--model <modelId>]
 
 Notes:
   - Fetches HTML, extracts main article (Readability), converts to Markdown (Turndown)
   - Translates Markdown via OpenClaw agent (CLI)
+  - If --model is omitted, uses the current OpenClaw default model (openclaw models status)
 `);
 }
 
@@ -39,7 +40,7 @@ if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
 
 const url = args[0];
 const lang = argValue(args, '--lang', 'zh');
-const model = argValue(args, '--model', 'openai-codex/gpt-5.2');
+const model = argValue(args, '--model', null);
 
 await fs.mkdir(CONTENT_ROOT, { recursive: true });
 
@@ -67,7 +68,7 @@ const zhFrontmatter = {
   date,
   sourceUrl: url,
   lang,
-  model,
+  ...(model ? { model } : {}),
 };
 const zhMd = matter.stringify(translated, zhFrontmatter);
 await fs.writeFile(path.join(dir, `${lang}.md`), zhMd, 'utf-8');
@@ -77,7 +78,7 @@ const meta = {
   title: title || slug,
   date,
   sourceUrl: url,
-  model,
+  ...(model ? { model } : {}),
   targetLang: lang,
   createdAt: now.toISOString(),
 };
@@ -129,14 +130,28 @@ function makeSlug(title) {
 
 function translateMarkdown(sourceMarkdown, { targetLang, model }) {
   const prompt = buildTranslatePrompt(sourceMarkdown, targetLang);
-  // Make model configurable by temporarily switching OpenClaw's default model.
+
+  // Model selection:
+  // - If --model is omitted, we use OpenClaw's current default model.
+  // - If --model is provided, we try to switch default model temporarily.
   // NOTE: This assumes you run one translation at a time.
-  const before = getOpenClawDefaultModel();
+  const status = getOpenClawModelsStatus();
+  const before = status?.defaultModel || status?.resolvedDefault || null;
+  const allowed = new Set(status?.allowed || []);
+
   let switched = false;
   try {
-    if (model && before && model !== before) {
-      run(['openclaw', 'models', 'set', model]);
-      switched = true;
+    if (model) {
+      if (allowed.size > 0 && !allowed.has(model)) {
+        throw new Error(
+          `Requested model not allowed by this OpenClaw config: ${model}\n` +
+          `Allowed models: ${Array.from(allowed).join(', ')}`
+        );
+      }
+      if (before && model !== before) {
+        run(['openclaw', 'models', 'set', model]);
+        switched = true;
+      }
     }
 
     const r = run(['openclaw', 'agent', '--agent', 'main', '--message', prompt]);
@@ -151,12 +166,11 @@ function translateMarkdown(sourceMarkdown, { targetLang, model }) {
   }
 }
 
-function getOpenClawDefaultModel() {
+function getOpenClawModelsStatus() {
   const r = spawnSync('openclaw', ['models', 'status', '--json'], { encoding: 'utf-8' });
   if (r.status !== 0) return null;
   try {
-    const obj = JSON.parse(r.stdout);
-    return obj.defaultModel || obj.resolvedDefault || null;
+    return JSON.parse(r.stdout);
   } catch {
     return null;
   }

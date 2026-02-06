@@ -38,7 +38,7 @@ Follow the steps below. You may also refer to `scripts/BOOTSTRAP.md`.
 - Which hosting provider they prefer (Netlify / Vercel / Cloudflare Pages / GitHub Pages / etc.)
 - Their site URL (or whether they want you to create/configure it)
 - Preferred default translation target language (default: `zh`)
-- Preferred model (default: `openai-codex/gpt-5.2`)
+- Preferred model (optional; if omitted, use the user's OpenClaw default model)
 
 ### 1) Repo + deployment
 
@@ -122,7 +122,7 @@ In a fork clone:
 
 - Node.js 22+
 - OpenClaw gateway running locally
-- A configured model provider in OpenClaw (default suggested: `openai-codex/gpt-5.2`)
+- A configured model provider in OpenClaw (any working default model)
 
 ## License
 

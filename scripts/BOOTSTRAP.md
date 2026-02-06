@@ -24,7 +24,7 @@ After setup, the human can:
 1) Confirm prerequisites
 - Node.js 22+
 - OpenClaw gateway is running locally
-- A working model provider is configured (default: `openai-codex/gpt-5.2`)
+- A working model provider is configured (use the user's OpenClaw default model)
 
 2) Ask the human for deployment details
 - Which hosting provider do they prefer? (Netlify / Vercel / Cloudflare Pages / GitHub Pages / etc.)
@@ -66,7 +66,14 @@ Before running automation on a user’s machine:
 On `URL + crab`:
 
 ```bash
-./scripts/run-crab.sh <url> --lang zh --model openai-codex/gpt-5.2
+# simplest
+./scripts/run-crab.sh <url>
+
+# explicit target language
+./scripts/run-crab.sh <url> --lang zh
+
+# explicit model (optional)
+./scripts/run-crab.sh <url> --model <modelId>
 ```
 
 Then commit and push to `main`, and reply with the deployed page URL.

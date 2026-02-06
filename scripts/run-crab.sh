@@ -5,6 +5,8 @@ set -euo pipefail
 # URL + optional flags -> run TransCrab pipeline locally.
 #
 # Usage:
-#   ./scripts/run-crab.sh <url> [--lang zh] [--model openai-codex/gpt-5.2]
+#   ./scripts/run-crab.sh <url> [--lang zh] [--model <modelId>]
+#
+# If --model is omitted, TransCrab uses your OpenClaw default model.
 
 node ./scripts/add-url.mjs "$@"
