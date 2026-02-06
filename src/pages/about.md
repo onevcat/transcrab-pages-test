@@ -1,5 +1,7 @@
 ---
+layout: ../layouts/Base.astro
 title: 关于
+description: 水淡如常，月照如初
 ---
 
 抓取 · 翻译 · 阅读
