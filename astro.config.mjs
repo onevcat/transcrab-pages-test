@@ -1,7 +1,9 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'http://localhost:4321',
+  // GitHub Pages deployment (repo pages)
+  site: 'https://onevcat.github.io',
+  base: '/transcrab-pages-test',
   output: 'static',
   markdown: {
     shikiConfig: {
