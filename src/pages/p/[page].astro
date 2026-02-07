@@ -16,13 +16,14 @@ export async function getStaticPaths() {
 
 const PAGE_SIZE = 30;
 const page = Number(Astro.params.page || '1');
+const base = import.meta.env.BASE_URL;
 const articles = await listArticles();
 const totalPages = Math.max(1, Math.ceil(articles.length / PAGE_SIZE));
 const start = (page - 1) * PAGE_SIZE;
 const list = articles.slice(start, start + PAGE_SIZE);
 
-const prevPath = page > 2 ? `/p/${page - 1}/` : '/';
-const nextPath = page < totalPages ? `/p/${page + 1}/` : null;
+const prevPath = page > 2 ? `${base}p/${page - 1}/` : base;
+const nextPath = page < totalPages ? `${base}p/${page + 1}/` : null;
 ---
 
 <Base title="TransCrab" description="水淡如常，月照如初">
@@ -32,7 +33,7 @@ const nextPath = page < totalPages ? `/p/${page + 1}/` : null;
 
   {list.map((a) => (
     <div style="padding: 1rem 0; border-bottom: 1px solid rgba(127,127,127,.25);">
-      <div><a href={`/a/${a.yyyy}/${a.mm}/${a.slug}/`}>{a.title}</a></div>
+      <div><a href={`${base}a/${a.yyyy}/${a.mm}/${a.slug}/`}>{a.title}</a></div>
       <div class="meta">
         <span>{a.dateDisplay ?? ''}</span>
         {a.sourceUrl ? (

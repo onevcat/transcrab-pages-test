@@ -6,7 +6,8 @@ const PAGE_SIZE = 30;
 const articles = await listArticles();
 const totalPages = Math.max(1, Math.ceil(articles.length / PAGE_SIZE));
 const list = articles.slice(0, PAGE_SIZE);
-const nextPath = totalPages > 1 ? '/p/2/' : null;
+const base = import.meta.env.BASE_URL;
+const nextPath = totalPages > 1 ? `${base}p/2/` : null;
 ---
 
 <Base title="TransCrab" description="水淡如常，月照如初">
@@ -16,7 +17,7 @@ const nextPath = totalPages > 1 ? '/p/2/' : null;
 
   {list.map((a) => (
     <div style="padding: 1rem 0; border-bottom: 1px solid rgba(127,127,127,.25);">
-      <div><a href={`/a/${a.yyyy}/${a.mm}/${a.slug}/`}>{a.title}</a></div>
+      <div><a href={`${base}a/${a.yyyy}/${a.mm}/${a.slug}/`}>{a.title}</a></div>
       <div class="meta">
         <span>{a.dateDisplay ?? ''}</span>
         {a.sourceUrl ? (

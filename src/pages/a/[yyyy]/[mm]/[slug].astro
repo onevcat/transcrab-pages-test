@@ -18,7 +18,7 @@ const { html, title, sourceUrl, dateDisplay } = article;
 ---
 
 <Base title={title}>
-  <div class="nav"><a href="/">← 返回</a></div>
+  <div class="nav"><a href={import.meta.env.BASE_URL}>← 返回</a></div>
   <h1>{title}</h1>
   <div class="meta">
     {dateDisplay ? <span>{dateDisplay}</span> : null}
